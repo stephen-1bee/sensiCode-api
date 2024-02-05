@@ -2,16 +2,24 @@ const express = require("express");
 const router = express.Router();
 const moduleSchema = require("../models/moduleSchema");
 const mongoose = require("mongoose");
+const upload = require("../middlewares/multer");
+const cloudinary = require("../utils/cloudinary");
 
 // create
-router.post("/create", async (req, res) => {
+router.post("/create", upload.single("icon"), async (req, res) => {
   try {
     // grab creds
-    const { lesson, icons, title, icon, desc } = req.body;
+    const { lesson, title, desc } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ msg: "An icon is required" });
+    }
+
+    icon = (await cloudinary.uploader.upload(req.file.path)).secure_url;
 
     const newModule = new moduleSchema({
       lesson,
-      icons,
+      icon,
       title,
       icon,
       desc,
@@ -71,7 +79,7 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // update module
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", upload.single("icon"), async (req, res) => {
   try {
     // grab user id
     const moduleId = req.params.id;
@@ -81,12 +89,20 @@ router.put("/update/:id", async (req, res) => {
     }
 
     // grab creds
-    const { lesson, icons, title, icon, desc } = req.body;
+    const { lesson, title, desc } = req.body;
+
+    const module = await moduleSchema.findOne({ _id: moduleId });
+
+    const currentIcon = module.icon;
+
+    const updatedIcon = await cloudinary.uploader.upload(req.file.path);
+
+    const finalIcon = updatedIcon ? updatedIcon.secure_url : currentIcon;
 
     // update
     const updatedModule = await moduleSchema.updateOne(
       { _id: moduleId },
-      { lesson, icons, title, icon, desc }
+      { lesson, icon: finalIcon, title, desc }
     );
 
     return updatedModule.modifiedCount === 1

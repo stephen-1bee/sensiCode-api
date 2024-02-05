@@ -11,6 +11,11 @@ router.post("/create", async (req, res) => {
     const { fullname, email, password, confirm_password, account_type } =
       req.body;
 
+    // Check if password and confirm_password match
+    if (password !== confirm_password) {
+      return res.status(400).json({ msg: "Passwords do not match" });
+    }
+
     const hashPassword = await bcrypt.hash(password, 10);
 
     const doesExist = await teacherSchema.findOne({ email });
@@ -116,6 +121,38 @@ router.delete("/delete/:id", async (req, res) => {
           .status(200)
           .json({ msg: "teacher deleted successfully", teacher: delTeacher })
       : res.status(404).json({ msg: "fialed to delete student" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "internal server error" });
+  }
+});
+
+router.put("/update/:id", async (req, res) => {
+  try {
+    const teacherId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(teacherId)) {
+      return res.status(400).json({ msg: "teacher id not found" });
+    }
+
+    // grab creds
+    const { fullname, email, password, confirm_password, account_type } =
+      req.body;
+
+    const updateTeacher = await teacherSchema.updateOne(
+      { _id: teacherId },
+      {
+        fullname,
+        email,
+        password,
+        confirm_password,
+        account_type,
+      }
+    );
+
+    return updateTeacher.modifiedCount === 1
+      ? res.status(200).json({ msg: "teacher updated successfully" })
+      : res.status(404).json({ msg: "failed to update teacher" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "internal server error" });
