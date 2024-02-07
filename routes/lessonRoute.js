@@ -28,13 +28,13 @@ router.post("/create", async (req, res) => {
 // lesson by module
 router.get("/module/:id", async (req, res) => {
   try {
-    const lessonId = req.params.id;
+    const moduleId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(lessonId)) {
+    if (!mongoose.Types.ObjectId.isValid(moduleId)) {
       return res.status(400).json({ msg: "lesson id not found" });
     }
 
-    const lesson = await lessonSchema.find({ _id: lessonId });
+    const lesson = await lessonSchema.find({ module_id: moduleId });
 
     return lesson
       ? res.status(200).json({ msg: "success", lesson })
@@ -68,6 +68,31 @@ router.delete("/delete/:id", async (req, res) => {
     return delLesson
       ? res.status(200).json({ msg: "lesson deleted successfully" })
       : res.status(404).json({ msg: "failed to delete lesson" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: "internal server error" });
+  }
+});
+
+router.put("/update/:id", async (req, res) => {
+  try {
+    const lessonId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(lessonId)) {
+      return res.status(400).json({ msg: "lesson id not found" });
+    }
+
+    const { lesson } = req.body;
+    const updateLesson = await lessonSchema.updateOne(
+      { _id: lessonId },
+      { lesson }
+    );
+
+    return updateLesson.modifiedCount === 1
+      ? res
+          .status(200)
+          .json({ msg: "lesson updated successfully", updateLesson })
+      : res.status(404).json({ msg: "failed to update lesson" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "internal server error" });
