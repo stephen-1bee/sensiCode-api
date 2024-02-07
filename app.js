@@ -20,6 +20,7 @@ const teacherRoute = require("./routes/teacherRoute");
 const moduleRoute = require("./routes/moduleRoute");
 const createExerciseRoute = require("./routes/ceateExerciseRoute");
 const takeExerciseRoute = require("./routes/takeExerciseRoute");
+const lessonRoute = require("./routes/lessonRoute");
 
 // main
 con();
@@ -29,6 +30,7 @@ app.use("/api/v1/teachers", teacherRoute);
 app.use("/api/v1/modules", moduleRoute);
 app.use("/api/v1/createExercise", createExerciseRoute);
 app.use("/api/v1/takeExercise", takeExerciseRoute);
+app.use("/api/v1/lessons", lessonRoute);
 
 port = process.env.PORT || 40;
 app.listen(port, () => console.log(`listing on port ${port}`));
