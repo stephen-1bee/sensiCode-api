@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
   account_type: {
     type: String,
     require: true,
-    default: true,
+    default: null,
   },
   dateUpdated: {
     type: Date,
